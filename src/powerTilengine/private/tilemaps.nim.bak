@@ -1,0 +1,59 @@
+import tilengine
+import colors
+import rectangle
+import spans
+
+proc new*(_: typedesc[Tilemap], width, height: SomeInteger, tiles: openArray[Tile], bgColor: Color, tileset: Tileset): Tilemap =
+  createTilemap(height, width, if(tiles == nil): nil else: cast[ptr UncheckedArray[Tile]](tiles[0].addr), cast[uint32](bgColor), tileset)
+
+proc load*(_: typedesc[Tilemap], filename: string, layername: string = ""): Tilemap =
+  loadTilemap(filename.cstring, if(layername == ""): nil else: layername.cstring)
+
+proc clone*(tilemap: Tilemap): Tilemap = tilengine.clone(tilemap)
+proc `rows`*(tilemap: Tilemap): int = getRows(tilemap)
+proc `cols`*(tilemap: Tilemap): int = getCols(tilemap)
+
+type TilemapTilesets* = object
+  tmap: Tilemap
+  
+proc `tilesets`*(tilemap: Tilemap): TilemapTilesets = TilemapTilesets(tmap: tilemap)
+proc `[]`*(tsets: TilemapTilesets; idx: range[0..7]): Tileset = getTileset(tsets.tmap, idx)
+proc `[]=`*(tsets: TilemapTilesets; idx: range[0..7], value: Tileset) = setTileset(tsets.tmap, value, idx)
+proc `tileset`*(tilemap: Tilemap): Tileset = getTileset(tilemap)
+
+proc `[]=`*(tilemap: Tilemap; x: SomeInteger, y: SomeInteger, tile: Tile) {.inline.} =
+  # if(x < 0 or x > tilemap.getCols or y < 0 or y > tilemap.getRows): return
+  tilemap.setTile(y.int, x.int, tile)
+
+proc `[]`*(tilemap: Tilemap; x: SomeInteger, y: SomeInteger): Tile {.inline.} =
+  # if(x < 0 or x > tilemap.getCols or y < 0 or y > tilemap.getRows): raise e
+  return tilemap.getTile(y.int, x.int)
+
+proc copyTiles*[T: SomeNumber](src: Tilemap, srcRect: Rectangle[T], dest: Tilemap, destRect: Rectangle[T]) =
+  copyTiles(src, srcRect.y.int, srcRect.x.int, src.height.int, src.width.int, dest, destRect.y.int, destRect.x.int, destRect.height.int, destRect.width.int)
+
+proc getTiles*(tilemap: Tilemap, x: SomeInteger, y: SomeInteger): Span[Tile] = Span.new(tilengine.getTiles(tilemap, y.int, x.int), (tilemap.getRows() * tilemap.getCols()) - y.int * tilemap.getCols() + x.int)
+proc delete*(tilemap: Tilemap) = tilengine.delete(tilemap)
+
+export tilengine.Tilemap
+export tilengine.Tileset
+export tilengine.Tile
+export tilengine.TileFlags
+
+export tilengine.`palette`
+export tilengine.`tileset`
+export tilengine.`masked`
+export tilengine.`priority`
+export tilengine.`rotate`
+export tilengine.`flipy`
+export tilengine.`flipx`
+
+export tilengine.`palette=`
+export tilengine.`tileset=`
+export tilengine.`masked=`
+export tilengine.`priority=`
+export tilengine.`rotate=`
+export tilengine.`flipy=`
+export tilengine.`flipx=`
+
+export tilengine.`tileFlags`

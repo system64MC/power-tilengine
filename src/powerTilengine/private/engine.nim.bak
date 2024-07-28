@@ -1,0 +1,74 @@
+import tilengine
+import colors
+
+type
+  RasterCallback* = proc(line : int32): void
+  FrameCallback*  = proc(frame: int32): void
+
+var rCallback: RasterCallback = nil
+var fCallback: FrameCallback  = nil
+
+proc rastCallback(line: int32) {.cdecl.} =
+  if(rCallback == nil): return
+  rCallback(line)
+
+proc frameCallback(frame: int32): void {.cdecl.} =
+  if(fCallback == nil): return
+  fCallback(frame)
+
+func init*(_: typedesc[Engine], hres, vres: int, numLayers: int = 4, numSprites: int = 64, numAnimations: int = 64): Engine =
+  result = init(hres, vres, numLayers, numSprites, numAnimations)
+  setRasterCallback(rastCallback)
+  setFrameCallback(frameCallback)
+
+func deinit*(_: typedesc[Engine]) = deinit()
+func delete*(engine: Engine) = deleteContext(engine)
+
+func `context`*(_: typedesc[Engine]): Engine = getContext()
+func `context=`*(_: typedesc[Engine], value: Engine) = setContext(value)
+
+func `targetFps`*(_: typedesc[Engine]): int = getTargetFps()
+func `targetFps=`*(_: typedesc[Engine], value: int) = setTargetFps(value)
+
+func `width`*(_: typedesc[Engine]): int = getWidth()
+func `height`*(_: typedesc[Engine]): int = getHeight()
+
+func `numObjects`*(_: typedesc[Engine]): int = getNumObjects()
+func `numSprites`*(_: typedesc[Engine]): int = getNumSprites()
+func `numLayers`*(_: typedesc[Engine]): int = getNumLayers()
+func `usedMemory`*(_: typedesc[Engine]): int = getUsedMemory()
+func `version`*(_: typedesc[Engine]): int = getVersion()
+
+func `bgColor=`*(_: typedesc[Engine], value: Color) = setBgColor(value.r, value.g, value.b)
+func `bgColorTilemap=`*(_: typedesc[Engine], value: Tilemap) = setBgColorFromTilemap(value)
+func disableBgColor*(_:typedesc[Engine]) = disableBgColor()
+
+func `bgBitmap=`*(_: typedesc[Engine], value: Bitmap) = setBgBitmap(value)
+func `bgPalette=`*(_: typedesc[Engine], value: Palette) = setBgPalette(value)
+
+type EnginePalettes* = object
+func `palettes`*(_: typedesc[Engine]): EnginePalettes = EnginePalettes()
+func `[]`*(pals: EnginePalettes; idx: range[0..7]): Palette = getGlobalPalette(idx)
+func `[]=`*(pals: EnginePalettes; idx: range[0..7], value: Palette) = setGlobalPalette(idx, value)
+
+proc `rasterCallback=`*(_: typedesc[Engine], value: RasterCallback) = 
+  rCallback = value
+proc `frameCallback=`* (_: typedesc[Engine], value: FrameCallback ) = 
+  fCallback = value
+proc `blendFunction=`* (_: typedesc[Engine], value: BlendFunction) = setCustomBlendFunction(value)
+
+func setRenderTarget* (_: typedesc[Engine], value: openArray[uint8], pitch: int) = setRenderTarget(cast[ptr UncheckedArray[uint8]](value[0].addr), pitch)
+func updateFrame*(_: typedesc[Engine]) = updateFrame()
+
+func `loadPath=`*(_: typedesc[Engine], value: string) = setLoadPath(value.cstring)
+func `logLevel=`*(_: typedesc[Engine], value: LogLevel) = setLogLevel(value)
+func openResourcePack*(_: typedesc[Engine], value: string, key: string) = openResourcePack(value.cstring, key.cstring)
+func closeResourcePack*(_: typedesc[Engine]) = closeResourcePack()
+
+type EngineLayers* = object
+func `layers`*(_: typedesc[Engine]): EngineLayers = EngineLayers()
+func `[]`*(lays: EngineLayers; idx: SomeInteger): Layer = Layer(idx)
+
+export tilengine.BlendFunction
+export tilengine.LogLevel
+export tilengine.Engine
