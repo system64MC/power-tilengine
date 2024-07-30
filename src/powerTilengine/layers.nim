@@ -11,16 +11,16 @@ import rectangle
 import colors
 import exceptions
 
-# proc setup*(layer: Layer, tileset: ptset.Tileset, tilemap: ptmap.Tilemap) = 
+# proc setup*(layer: Layer, tileset: ptset.Tileset, tilemap: ptmap.Tilemap) =
 #   setLayer(
-#     layer, if(tileset == nil): nil else: tileset.getData(), 
+#     layer, if(tileset == nil): nil else: tileset.getData(),
 #     if(tilemap == nil): nil else: tilemap.getData()
 #   )
-# 
+#
 #   if(tileset != nil): tileset.setTilengine(true)
 #   if(tilemap != nil): tilemap.setTilengine(true)
 
-# proc setupCopy*(layer: Layer, tileset: ptset.Tileset, tilemap: ptmap.Tilemap) = 
+# proc setupCopy*(layer: Layer, tileset: ptset.Tileset, tilemap: ptmap.Tilemap) =
 #   setLayer(layer, tileset.getData().clone(), tilemap.getData().clone())
 
 type
@@ -58,10 +58,10 @@ proc `tilemap=`*(layer: Layer, value: ptmap.Tilemap) =
   let ltype = layer.getType()
   case ltype:
   of LayerTile:
-    t = layer.getTilemap() 
+    t = layer.getTilemap()
   of LayerBitmap:
     b = layer.getBitmap()
-  of LayerObject: 
+  of LayerObject:
     o = layer.getObjects()
   of LayerNone: discard
   setTilemap(layer, value.getData())
@@ -70,16 +70,16 @@ proc `tilemap=`*(layer: Layer, value: ptmap.Tilemap) =
   of LayerTile:
     if(t != nil): t.delete()
   of LayerBitmap:
-    if(b != nil): 
+    if(b != nil):
       b.setPalette(createPalette(1))
       b.delete()
-  of LayerObject: 
+  of LayerObject:
     if(o != nil): o.delete()
   of LayerNone: discard
 
 proc `bitmap`*(layer: Layer): pbmap.Bitmap = newBitmap(getBitmap(layer), true)
 proc `bitmap=`*(layer: Layer, value: pbmap.Bitmap) =
-  if(value.getTilengine()): 
+  if(value.getTilengine()):
     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
   var
     t: tilengine.Tilemap
@@ -88,10 +88,10 @@ proc `bitmap=`*(layer: Layer, value: pbmap.Bitmap) =
   let ltype = layer.getType()
   case ltype:
   of LayerTile:
-    t = layer.getTilemap() 
+    t = layer.getTilemap()
   of LayerBitmap:
     b = layer.getBitmap()
-  of LayerObject: 
+  of LayerObject:
     o = layer.getObjects()
   of LayerNone: discard
   let bm = value.getData()
@@ -103,15 +103,15 @@ proc `bitmap=`*(layer: Layer, value: pbmap.Bitmap) =
   of LayerTile:
     if(t != nil): t.delete()
   of LayerBitmap:
-    if(b != nil): 
+    if(b != nil):
       b.setPalette(createPalette(1))
       b.delete()
-  of LayerObject: 
+  of LayerObject:
     if(o != nil): o.delete()
   of LayerNone: discard
 
-proc `objects=`*(layer: Layer, value: (polist.ObjectList, ptset.Tileset)) = 
-  if(value[0].getTilengine() or (value[1] != nil and value[1].getTilengine())): 
+proc `objects=`*(layer: Layer, value: (polist.ObjectList, ptset.Tileset)) =
+  if(value[0].getTilengine() or (value[1] != nil and value[1].getTilengine())):
     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
   var
     t: tilengine.Tilemap
@@ -120,10 +120,10 @@ proc `objects=`*(layer: Layer, value: (polist.ObjectList, ptset.Tileset)) =
   let ltype = layer.getType()
   case ltype:
   of LayerTile:
-    t = layer.getTilemap() 
+    t = layer.getTilemap()
   of LayerBitmap:
     b = layer.getBitmap()
-  of LayerObject: 
+  of LayerObject:
     o = layer.getObjects()
   of LayerNone: discard
   setObjects(layer, value[0].getData(), if(value[1] == nil): nil else: value[1].getData())
@@ -133,15 +133,15 @@ proc `objects=`*(layer: Layer, value: (polist.ObjectList, ptset.Tileset)) =
   of LayerTile:
     if(t != nil): t.delete()
   of LayerBitmap:
-    if(b != nil): 
+    if(b != nil):
       b.setPalette(createPalette(1))
       b.delete()
-  of LayerObject: 
+  of LayerObject:
     if(o != nil): o.delete()
   of LayerNone: discard
 
-# proc `objects=`*(layer: Layer, value: tuple[objects: polist.ObjectList, tileset: ptset.Tileset]) = 
-#   if(value[0].getTilengine() or (value[1] != nil and value[1].getTilengine())): 
+# proc `objects=`*(layer: Layer, value: tuple[objects: polist.ObjectList, tileset: ptset.Tileset]) =
+#   if(value[0].getTilengine() or (value[1] != nil and value[1].getTilengine())):
 #     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
 #   let o = layer.getObjects()
 #   setObjects(layer, value[0].getData(), if(value[1] == nil): nil else: value[1].getData())
@@ -149,52 +149,52 @@ proc `objects=`*(layer: Layer, value: (polist.ObjectList, ptset.Tileset)) =
 #   if(value[1] != nil): value[1].setTilengine(true)
 #   if(o != nil): o.delete()
 
-proc `item`*(value: Layer): LayerItem = 
+proc `item`*(value: Layer): LayerItem =
   case value.getType():
   of LayerTile: result = layerItem(newTilemap(value.getTilemap(), true))
   of LayerBitmap: result = layerItem(newBitmap(value.getBitmap(), true))
   of LayerObject: result = layerItem(newObjectList(value.getObjects(), true))
   of LayerNone: result = layerItem()
 
-proc `item=`*(layer: Layer, value: LayerItem) = 
+proc `item=`*(layer: Layer, value: LayerItem) =
   case value.kind:
   of LayerTile: layer.tilemap = value.tilemap
   of LayerBitmap: layer.bitmap = value.bitmap
   of LayerObject: layer.objects = (value.objects, nil)
   of LayerNone: discard
-    
+
 proc setTilemap*(layer: Layer, value: ptmap.Tilemap): LayerItem =
-  if(value.getTilengine()): 
+  if(value.getTilengine()):
     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
   let ltype = layer.getType()
   case ltype:
   of LayerTile:
-    result = layerItem(newTilemap(layer.getTilemap(), false)) 
+    result = layerItem(newTilemap(layer.getTilemap(), false))
   of LayerBitmap:
     let bmap = layer.getBitmap()
     bmap.setPalette(createPalette(1))
     result = layerItem(newBitmap(bmap, false))
-  of LayerObject: 
+  of LayerObject:
     result = layerItem(newObjectList(layer.getObjects(), false))
-  of LayerNone: 
+  of LayerNone:
     result = layerItem()
   setTilemap(layer, value.getData())
   value.setTilengine(true)
 
 proc setBitmap*(layer: Layer, value: pbmap.Bitmap): LayerItem =
-  if(value.getTilengine()): 
+  if(value.getTilengine()):
     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
   let ltype = layer.getType()
   case ltype:
   of LayerTile:
-    result = layerItem(newTilemap(layer.getTilemap(), false)) 
+    result = layerItem(newTilemap(layer.getTilemap(), false))
   of LayerBitmap:
     let bmap = layer.getBitmap()
     bmap.setPalette(createPalette(1))
     result = layerItem(newBitmap(bmap, false))
-  of LayerObject: 
+  of LayerObject:
     result = layerItem(newObjectList(layer.getObjects(), false))
-  of LayerNone: 
+  of LayerNone:
     result = layerItem()
   let bitmap = value.getData()
   bitmap.getPalette().delete()
@@ -203,22 +203,22 @@ proc setBitmap*(layer: Layer, value: pbmap.Bitmap): LayerItem =
   value.setTilengine(true)
 
 proc setObjects*(layer: Layer, value: polist.ObjectList, tileset: ptset.Tileset = nil): LayerItem =
-  if(value.getTilengine() or (tileset != nil and tileset.getTilengine())): 
+  if(value.getTilengine() or (tileset != nil and tileset.getTilengine())):
     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
   let ltype = layer.getType()
   case ltype:
   of LayerTile:
-    result = layerItem(newTilemap(layer.getTilemap(), false)) 
+    result = layerItem(newTilemap(layer.getTilemap(), false))
   of LayerBitmap:
     let bmap = layer.getBitmap()
     bmap.setPalette(createPalette(1))
     result = layerItem(newBitmap(bmap, false))
-  of LayerObject: 
+  of LayerObject:
     result = layerItem(newObjectList(layer.getObjects(), false))
-  of LayerNone: 
+  of LayerNone:
     result = layerItem()
   setObjects(layer, value.getData(), if(tileset == nil): nil else: tileset.getData())
-  value.setTilengine(true) 
+  value.setTilengine(true)
 
 proc setItem*(layer: Layer, value: LayerItem): LayerItem =
   case value.kind:
@@ -231,8 +231,8 @@ proc setItem*(layer: Layer, value: LayerItem): LayerItem =
   of LayerNone: discard
 
 # proc `palette`*(layer: Layer): ppal.Palette = newPalette(getPalette(layer), true)
-# proc `palette=`*(layer: Layer, value: ppal.Palette) = 
-#   if(value.getTilengine()): 
+# proc `palette=`*(layer: Layer, value: ppal.Palette) =
+#   if(value.getTilengine()):
 #     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
 #   let p = layer.getPalette()
 #   setPalette(layer, value.getData())
@@ -244,8 +244,8 @@ proc setItem*(layer: Layer, value: LayerItem): LayerItem =
 #   setGlobalPalette(0, ctx.getCRAM().getTlnPalette(0))
 
 proc `tileset`*(layer: Layer): ptset.Tileset = newTileset(getTileset(layer), true)
-proc `tileset=`*(layer: Layer, value: ptset.Tileset) = 
-  if(value.getTilengine()): 
+proc `tileset=`*(layer: Layer, value: ptset.Tileset) =
+  if(value.getTilengine()):
     raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
   let t = layer.getTileset()
   setLayer(layer, value.getData(), getTilemap(layer))
@@ -262,14 +262,14 @@ proc `affineTransform=`*(layer: Layer, value: Affine) = setAffineTransform(layer
 proc disableAffineTransform*(layer: Layer) = tilengine.disableAffineTransform(layer)
 proc setTransform*(layer: Layer; angle: SomeFloat; dx, dy, sx, sy: SomeFloat) = tilengine.setTransform(layer, angle.float32, dx.float32, dy.float32, sx.float32, sy.float32)
 
-proc `pixelMap=`*(layer: Layer, table: openArray[PixelMap]) = 
+proc `pixelMap=`*(layer: Layer, table: openArray[PixelMap]) =
   if(table.len == 0): disablePixelMapping(layer)
   else: setPixelMapping(layer, cast[ptr UncheckedArray[PixelMap]](table[0].addr))
 
 proc `blend=`*(layer: Layer, value: (Blend, uint8)) = setBlendMode(layer, value[0], value[1])
 proc `blend=`*(layer: Layer, value: tuple[mode: Blend, factor: uint8]) = setBlendMode(layer, value.mode, value.factor)
 
-proc `columnOffsets=`*(layer: Layer, offsets: openArray[int32]) = 
+proc `columnOffsets=`*(layer: Layer, offsets: openArray[int32]) =
   setColumnOffset(layer, if(offsets.len == 0): nil else: cast[ptr UncheckedArray[int32]](offsets[0].addr))
 
 proc `window=`*(layer: Layer, value: (Rectangle[SomeNumber], bool)) = setWindow(layer, value[0].x.int, value[0].y.int, (value[0].x + value[0].width).int, (value[0].y + value[0].height).int, value[1])
@@ -287,12 +287,12 @@ proc disableMosaic*(layer: Layer) = tilengine.disableMosaic(layer)
 
 proc resetMode*(layer: Layer) = resetLayerMode(layer)
 
-proc `objects`*(layer: Layer): polist.ObjectList = 
+proc `objects`*(layer: Layer): polist.ObjectList =
   newObjectList(getObjects(layer), true)
 
 proc `priority=`*(layer: Layer, value: bool) = setPriority(layer, value)
 
-proc `enable=`*(layer: Layer, value: bool) = 
+proc `enable=`*(layer: Layer, value: bool) =
   if(value): tilengine.enable(layer) else: tilengine.disable(layer)
 
 proc `type`*(layer: Layer): LayerType = getType(layer)
@@ -350,7 +350,7 @@ proc swap*(layer1: Layer, layer2: Layer) =
   of LayerBitmap: layer1.setBitmap(b2)
   of LayerObject: layer1.setObjects(o2, nil)
   of LayerNone: discard
-    
+
 
 export tilengine.Layer
 export tilengine.Affine

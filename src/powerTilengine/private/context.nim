@@ -2,6 +2,7 @@ import tilengine
 import tilemap as ptmap
 import palette as ppal
 import cram as pcram
+import spriteset as psset
 import colors
 import raylib
 
@@ -20,6 +21,7 @@ type
     textures: array[2, RenderTexture2d] # 3th texture is crt mask
     crtMasks: array[1, Texture2D]
     systemShader: Shader
+    spritesets: seq[psset.Spriteset]
 
   Context* = ref EngineImpl
 
@@ -29,10 +31,10 @@ proc `=destroy`(context: EngineImpl): void =
     of LayerTile:
       let tmap = Layer(i).getTilemap()
       if(tmap != nil): tmap.delete()
-    of LayerBitmap: 
+    of LayerBitmap:
       let bmap = Layer(i).getBitmap()
       if(bmap != nil): bmap.delete()
-    of LayerObject: 
+    of LayerObject:
       let objs = Layer(i).getObjects()
       if(objs != nil): objs.delete()
     of LayerNone: continue
@@ -40,7 +42,7 @@ proc `=destroy`(context: EngineImpl): void =
   closeWindow()
 
 proc getContext*(ctx: Context): tilengine.Engine = ctx.tlnContext
-proc setContext*(ctx: Context, value: tilengine.Engine) = 
+proc setContext*(ctx: Context, value: tilengine.Engine) =
   ctx.tlnContext = value
 
 proc getFb*(ctx: Context): ptr seq[colors.Color] = ctx.fBuffer.addr
@@ -58,11 +60,11 @@ proc setTexture*(ctx: Context, hres, vres: int) =
   setTextureFilter(ctx.crtMasks[0], Bilinear)
 
 proc getFps*(ctx: Context): int = ctx.targetFps
-proc setFps*(ctx: Context, value: SomeInteger) = 
+proc setFps*(ctx: Context, value: SomeInteger) =
   ctx.targetFps = value.int
 
 proc getScale*(ctx: Context): float32 = ctx.scale
-proc setScale*(ctx: Context, value: SomeFloat) = 
+proc setScale*(ctx: Context, value: SomeFloat) =
   ctx.scale = value.float32
 
 proc getHres*(ctx: Context): int = ctx.hres
@@ -105,7 +107,8 @@ proc newContext*(ctx: tilengine.Engine, hres, vres, numLayers, numSprites, numAn
     numAnimations: numAnimations,
     targetFps: targetFps,
     fBuffer: newSeq[colors.Color](hres * vres),
-    cram: newCram(palLength)
+    cram: newCram(palLength),
+    spritesets: newSeq[psset.Spriteset](numSprites)
   )
 
 proc setupSystemShader*(ctx: Context) =
@@ -115,3 +118,9 @@ proc getSystemShader*(ctx: Context): ptr Shader =
   ctx.systemShader.addr
 
 var ctx*: Context
+
+template setSpriteSet*(ctx: Context, index: SomeInteger, sset: psset.Spriteset) =
+  ctx.spritesets[index] = sset
+
+proc getSpriteSet*(ctx: Context, index: SomeInteger): psset.Spriteset =
+  return ctx.spritesets[index]

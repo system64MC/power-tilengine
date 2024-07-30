@@ -10,7 +10,12 @@ from animations import AnimationState
 
 proc config*(sprite: Sprite, spriteset: psset.Spriteset, flags: set[SpriteFlag]) = configSprite(sprite, spriteset.getData(), flags)
 
-proc `spriteset=`*(sprite: Sprite, spriteset: psset.Spriteset) = setSpriteset(sprite, spriteset.getData())
+proc `spriteset=`*(sprite: Sprite, spriteset: psset.Spriteset) =
+  ctx.setSpriteSet(sprite.int32, spriteset)
+  setSpriteset(sprite, spriteset.getData())
+
+proc `spriteset`*(sprite: Sprite): psset.Spriteset =
+  return ctx.getSpriteSet(sprite.int32)
 
 proc `flags=`*(sprite: Sprite, flags: set[SpriteFlag]) = setFlags(sprite, flags)
 
@@ -23,20 +28,6 @@ proc `position`*(sprite: Sprite): GVec2[int] = gvec2[int](sprite.getX(), sprite.
 
 proc `picture=`*(sprite: Sprite, picture: SomeInteger) = setPicture(sprite, picture.int)
 proc `picture`*(sprite: Sprite): int = getPicture(sprite)
-
-# proc `palette=`*(sprite: Sprite, palette: ppal.Palette) =
-#   if(palette.getTilengine()): raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
-#   let p = sprite.getPalette()
-#   setPalette(sprite, palette.getData())
-#   palette.setTilengine(true)
-#   p.delete()
-
-# proc setPalette*(sprite: Sprite, palette: ppal.Palette): ppal.Palette =
-#   if(palette.getTilengine()): raise newException(OwnershipError, "This object already belongs to Tilengine,\nuse the 'clone()' procedure to fix this error.")
-#   let p = sprite.getPalette()
-#   setPalette(sprite, palette.getData())
-#   palette.setTilengine(true)
-#   newPalette(p, false)
 
 proc `palette=`*(sprite: Sprite, palette: SomeInteger) =
   sprite.setPalette(ctx.getCram()[palette].getData())
@@ -76,7 +67,7 @@ proc `animationState=`*(sprite: Sprite, value: AnimationState) =
   of Play: resumeAnimation(sprite)
   of Pause: pauseAnimation(sprite)
   of Disable: disableAnimation(sprite)
-  
+
 
 export tilengine.Sprite
 export tilengine.SpriteFlag
